@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Google</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <nav>
+    <button data-tab="home">[H] Home</button>
+    <button data-tab="games">[G] Games</button>
+    <button data-tab="apps">[A] Apps</button>
+    <button onclick="openSettings()">[S] Settings</button>
+  </nav>
+
+  <section id="home" class="tab active">
+    <h1>welcome to <span id="argon">Argon</span></h1>
+    <p class="centered">Enjoy your stay.</p>
+  </section>
+
+  <section id="games" class="tab">
+    <input type="text" id="search" placeholder="Search games..." />
+    <div id="gameGrid" class="grid"></div>
+  </section>
+
+  <section id="apps" class="tab">
+    <input type="text" id="appSearch" placeholder="Search apps..." />
+    <div id="appGrid" class="grid"></div>
+  </section>
+
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeSettings()">×</button>
+      <aside>
+        <button id="btn-cloak" class="active" onclick="showSettings('cloak')">Cloak</button>
+        <button id="btn-credits" onclick="showSettings('credits')">Credits</button>
+      </aside>
+
+      <main id="cloak" class="settings-tab active">
+        <div class="cloak-content">
+          <button class="cloak-action" onclick="cloakSite()">Activate Cloak</button>
+          <div class="panic-container">
+            <label for="panicKeyInput">Panic key:</label>
+            <input type="text" id="panicKeyInput" maxlength="1" placeholder="e.g. Esc" />
+            <button id="setPanicKeyBtn">Set Panic Key</button>
+            <p id="panicKeyStatus"></p>
+          </div>
+        </div>
+      </main>
+
+      <main id="credits" class="settings-tab">
+        <ul class="credits-list">
+          <li><strong>Christian</strong> – Coder, Developer</li>
+          <li><strong>hutchinsan</strong> – Owner</li>
+        </ul>
+      </main>
+    </div>
+  </div>
+
+  <div id="gameOverlay" class="overlay">
+    <div id="loader"><div class="progress-bar"></div></div>
+    <div class="game-header">
+      <button onclick="fullscreenGame()">Fullscreen</button>
+      <button onclick="cloakGame()">Cloak Content</button>
+      <button onclick="closeGame()">Close</button>
+    </div>
+    <iframe id="gameFrame"></iframe>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
