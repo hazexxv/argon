@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Argon</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at center, #2f0d3e, #1a0524);
+      color: white;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 1em;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+    }
+    nav button {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 0.5em 1em;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    nav button:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.5);
+    }
+    .tab {
+      display: none;
+      max-width: 1100px;
+      margin: 1em auto;
+      padding: 2em;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(16px);
+      border-radius: 16px;
+    }
+    .tab.active {
+      display: block;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2em;
+      margin-bottom: 0.5em;
+      text-shadow: 0 0 10px #42a5f5;
+    }
+    #argon {
+      animation: argonGlow 5s infinite linear;
+    }
+    @keyframes argonGlow {
+      0%   { color: #42a5f5; }
+      50%  { color: #81d4fa; }
+      100% { color: #42a5f5; }
+    }
+    .centered {
+      text-align: center;
+      font-size: 1.2em;
+      margin-top: 1em;
+    }
+    #search,
+    #appSearch {
+      display: block;
+      width: 360px;
+      margin: 0 auto 1.5em;
+      padding: 0.65em;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 10px;
+      color: white;
+      font-size: 1em;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1em;
+      padding-bottom: 2em;
+    }
+    .grid div {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(16px);
+      padding: 1.2em;
+      text-align: center;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .grid div:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+    #settingsModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+    }
+    #settingsModal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      position: relative;
+      display: flex;
+      gap: 2em;
+      padding: 2em;
+      width: 60%;
+      max-width: 800px;
+      max-height: 80vh;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(16px);
+      border-radius: 16px;
+      overflow: hidden;
+      align-items: flex-start;
+    }
+    .close-btn {
+      position: absolute;
+      top: 1em;
+      right: 1em;
+      background: transparent;
+      border: none;
+      font-size: 1.5em;
+      color: white;
+      cursor: pointer;
+    }
+    aside {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+    }
+    aside button {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 0.6em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    aside button:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    aside button.active {
+      background: linear-gradient(135deg, #42a5f5, #81d4fa);
+      border-color: #81d4fa;
+      color: #0e151f;
+      box-shadow: 0 0 8px #42a5f5, 0 0 16px #81d4fa;
+    }
+    .settings-tab {
+      flex: 3;
+      display: none;
+      overflow-y: auto;
+    }
+    .settings-tab.active {
+      display: block;
+    }
+    .cloak-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5em;
+      width: 100%;
+      padding-top: 1em;
+    }
+    .cloak-action {
+      background: linear-gradient(135deg, #42a5f5, #81d4fa);
+      border: none;
+      color: #0e151f;
+      font-weight: bold;
+      padding: 0.8em 1.2em;
+      border-radius: 8px;
+      box-shadow: 0 0 8px #42a5f5, 0 0 16px #81d4fa;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .cloak-action:hover {
+      transform: scale(1.05);
+    }
+    .panic-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5em;
+      width: 100%;
+      max-width: 320px;
+    }
+    .panic-container input {
+      width: 80px;
+      padding: 0.4em;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    .panic-container button {
+      width: 120px;
+      padding: 0.5em;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .panic-container button:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    #panicKeyStatus {
+      font-size: 0.9em;
+      color: #81d4fa;
+    }
+    .credits-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+    }
+    .credits-list li {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(16px);
+      padding: 1em;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+    #gameOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 300;
+      flex-direction: column;
+    }
+    #gameOverlay.active {
+      display: flex;
+    }
+    #loader {
+      width: 60%;
+      max-width: 600px;
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      margin: 2em auto;
+      overflow: hidden;
+      display: none;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: #ffb74d;
+      animation: loadBar 3s forwards;
+    }
+    @keyframes loadBar {
+      to { width: 100%; }
+    }
+    .game-header {
+      display: none;
+      justify-content: center;
+      gap: 1em;
+      padding: 1em;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(16px);
+    }
+    .game-header button {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 0.6em 1em;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .game-header button:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-1px);
+    }
+    iframe {
+      flex: 1;
+      border: none;
+      display: none;
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <button data-tab="home">[H] Home</button>
+    <button data-tab="games">[G] Games</button>
+    <button data-tab="apps">[A] Apps</button>
+    <button onclick="openSettings()">[S] Settings</button>
+  </nav>
+
+  <section id="home" class="tab active">
+    <h1>welcome to <span id="argon">Argon</span></h1>
+    <p class="centered">Enjoy your stay.</p>
+  </section>
+
+  <section id="games" class="tab">
+    <input type="text" id="search" placeholder="Search games..." />
+    <div id="gameGrid" class="grid"></div>
+  </section>
+
+  <section id="apps" class="tab">
+    <input type="text" id="appSearch" placeholder="Search apps..." />
+    <div id="appGrid" class="grid"></div>
+  </section>
+
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeSettings()">×</button>
+      <aside>
+        <button id="btn-cloak" class="active" onclick="showSettings('cloak')">Cloak</button>
+        <button id="btn-credits" onclick="showSettings('credits')">Credits</button>
+      </aside>
+      <main id="cloak" class="settings-tab active">
+        <div class="cloak-content">
+          <button class="cloak-action" onclick="cloakSite()">Activate Cloak</button>
+          <div class="panic-container">
+            <label for="panicKeyInput">Panic key:</label>
+            <input type="text" id="panicKeyInput" maxlength="1" placeholder="e.g. Esc" />
+            <button id="setPanicKeyBtn">Set Panic Key</button>
+            <p id="panicKeyStatus"></p>
+          </div>
+        </div>
+      </main>
+      <main id="credits" class="settings-tab">
+        <ul class="credits-list">
+          <li><strong>Christian</strong> – Coder, Developer</li>
+          <li><strong>hutchinsan</strong> – Owner</li>
+        </ul>
+      </main>
+    </div>
+  </div>
+
+  <div id="gameOverlay" class="overlay">
+    <div id="loader"><div class="progress-bar"></div></div>
+    <div class="game-header">
+      <button onclick="fullscreenGame()">Fullscreen</button>
+      <button onclick="cloakGame()">Cloak Content</button>
+      <button onclick="closeGame()">Close</button>
+    </div>
+    <iframe id="gameFrame"></iframe>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = document.querySelectorAll('.tab')
+      const navButtons = document.querySelectorAll('nav button[data-tab]')
+      const modal = document.getElementById('settingsModal')
+      const asideButtons = document.querySelectorAll('aside button')
+      const panicInput = document.getElementById('panicKeyInput')
+      const setPanicBtn = document.getElementById('setPanicKeyBtn')
+      const panicStatus = document.getElementById('panicKeyStatus')
+      const overlay = document.getElementById('gameOverlay')
+      const loader = document.getElementById('loader')
+      const header = overlay.querySelector('.game-header')
+      const iframe = document.getElementById('gameFrame')
+
+      navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'))
+          document.getElementById(btn.dataset.tab).classList.add('active')
+        })
+      })
+
+      window.openSettings = () => modal.classList.add('active')
+      window.closeSettings = () => modal.classList.remove('active')
+
+      window.showSettings = section => {
+        document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'))
+        document.getElementById(section).classList.add('active')
+        asideButtons.forEach(b => b.classList.remove('active'))
+        document.getElementById(`btn-${section}`).classList.add('active')
+      }
+
+      window.cloakSite = () => {
+        const origURL = window.location.href
+        const w = window.open('about:blank', '_blank')
+        w.document.write(`<iframe src="${origURL}" style="border:none;position:fixed;top:0;left:0;width:100%;height:100%;"></iframe>`)
+        w.document.close()
+        window.location.href = 'https://www.clever.com/'
+      }
+
+      const savedPanic = localStorage.getItem('panicKey')
+      if (savedPanic) panicStatus.textContent = `Current panic key: "${savedPanic.toUpperCase()}"`
+
+      setPanicBtn.addEventListener('click', () => {
+        const key = panicInput.value.trim().toLowerCase()
+        if (key) {
+          localStorage.setItem('panicKey', key)
+          panicStatus.textContent = `Saved panic key: "${key.toUpperCase()}"`
+          panicInput.value = ''
+        }
+      })
+
+      document.addEventListener('keydown', e => {
+        if (e.key.toLowerCase() === localStorage.getItem('panicKey')) {
+          window.location.href = 'https://www.ixl.com/'
+        }
+      })
+
+      window.fullscreenGame = () => iframe.requestFullscreen?.()
+      window.cloakGame = () => {
+        const html = iframe.contentWindow.document.documentElement.outerHTML
+        const w = window.open('about:blank', '_blank')
+        w.document.write(html)
+        w.document.close()
+      }
+      window.closeGame = () => {
+        overlay.classList.remove('active')
+        header.style.display = 'none'
+        iframe.style.display = 'none'
+        iframe.srcdoc = ''
+      }
+
+      async function launchContent(url) {
+        overlay.classList.add('active')
+        loader.style.display = 'block'
+        header.style.display = 'none'
+        iframe.style.display = 'none'
+        const bar = loader.querySelector('.progress-bar')
+        bar.style.animation = 'none'
+        void bar.offsetWidth
+        bar.style.animation = 'loadBar 3s forwards'
+        try {
+          const code = await fetch(url).then(r => r.text())
+          iframe.onload = () => {
+            loader.style.display = 'none'
+            header.style.display = 'flex'
+            iframe.style.display = 'block'
+          }
+          iframe.srcdoc = code
+        } catch {
+          loader.style.display = 'none'
+          header.style.display = 'flex'
+          iframe.style.display = 'block'
+          iframe.srcdoc = '<p style="color:white;text-align:center;margin-top:2em;">Failed to load content.</p>'
+        }
+      }
+
+      window.launchGame = launchContent
+      window.launchApp = launchContent
+
+      async function populateGrid(repo, gridEl, searchEl) {
+        const apiURL = `https://api.github.com/repos/hazexxv/${repo}/contents?ref=main`
+        try {
+          const res = await fetch(apiURL)
+          if (!res.ok) throw new Error()
+          const files = await res.json()
+          const items = files.filter(f => f.type === 'file')
+          searchEl.placeholder = `Search ${repo} (${items.length})`
+          gridEl.innerHTML = ''
+          items.forEach(f => {
+            const name = f.name.replace(/\..+$/, '')
+            const card = document.createElement('div')
+            card.textContent = name
+            card.dataset.name = name.toLowerCase()
+            card.onclick = () => launchContent(f.download_url)
+            gridEl.appendChild(card)
+          })
+          searchEl.addEventListener('input', () => {
+            const q = searchEl.value.trim().toLowerCase()
+            Array.from(gridEl.children).forEach(card => {
+              card.style.display = card.dataset.name.includes(q) ? '' : 'none'
+            })
+          })
+        } catch {
+          gridEl.innerHTML = '<p style="text-align:center;color:#f44336;">Could not load content.</p>'
+        }
+      }
+
+      populateGrid('games', document.getElementById('gameGrid'), document.getElementById('search'))
+      populateGrid('apps', document.getElementById('appGrid'), document.getElementById('appSearch'))
+    })
+  </script>
+</body>
+</html>
